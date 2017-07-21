@@ -1,0 +1,241 @@
+<!-- URL converter: 
+1. entering url taken from native map
+2. converting it to a WP url
+3. options for regular WP or transit WP url 
+4. options of differennt language locals
+3. copy it to clipboard
+George Guan -->
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>URL Converter</title>
+    <meta charset="UTF-8">
+    <style>
+        div {
+            width: 20rem;
+            border: solid 2px #acacac;
+            padding: 2rem;
+        }
+        
+        input,
+        select {
+            margin-bottom: 30px
+        }
+        
+        input[type=submit] {
+            color: #aaa;
+        }
+        
+        #confirmMsg {
+            font-size: 80%;
+            padding-left: 1em;
+        }
+    </style>
+
+    <script>
+        var lang = "en";
+        var webcard = "";
+
+
+        function clearForm() {
+
+            //clear text fields and dropdown selection
+
+            document.getElementById("nativeMapWPURL").value = "";
+            document.getElementById("convertedWPURL").value = "";
+            var dropDown = document.getElementById("myselect");
+            dropDown.selectedIndex = 0;
+            document.getElementById("myRadiosWP").checked = false;
+            document.getElementById("myRadiosTWP").checked = false;
+            lang = "en";
+            location.reload();
+
+        }
+
+        function startHere() {
+            //give focus on first input element
+            //enable input 
+            document.getElementById("nativeMapWPURL").focus();
+
+            document.getElementById("mySubmit").disabled = false;
+            document.getElementById("mySubmit").style.color = "#000";
+
+            document.getElementById("myCopy").disabled = false;
+            document.getElementById("myCopy").style.color = "#000";
+
+        }
+
+        function checkSelect(lc) {
+            //return dropdown selection
+            lang = lc;
+            return lang;
+        }
+
+        function wphandler() {
+            //convert a url taken from native to a wp url 
+            var nmapURL = document.getElementById("nativeMapWPURL").value;
+            var wpURL = nmapURL.replace("https://maps.apple.com/?", "https://placecard-server-staging.ls.apple.com/place?");
+
+            var langParam = "&lang=" + lang;
+            wpURL = wpURL += langParam;
+
+            //display in url (converted) field
+            document.getElementById("convertedWPURL").value = wpURL;
+
+
+        }
+
+        function twphandler() {
+
+            var nmapURL = document.getElementById("nativeMapWPURL").value;
+            //extract auid from url of native map
+            function extId(urlString) {
+                var x = urlString;
+                var arr = x.match(/&auid\=[0-9]*&/g);
+                //alert popup and reload page if no auid in the url
+                if (arr == null) {
+                    alert("no auid in this url.");
+                    location.reload();
+
+                } else {
+                    var str = arr.toString();
+                    var aId = str.substring(6, str.length - 1);
+                    return aId;
+                }
+            }
+            var nmap_auid = extId(nmapURL);
+            //transit WP url template
+            var sampleURL = "https://placecard-server-staging.ls.apple.com/place?" + "lang=en&auid=14116540697584424828&transit";
+            //replace auid with one extracted from native map
+            var convertedWPURL = sampleURL.replace("14116540697584424828", nmap_auid);
+
+            var langParam = "lang=" + lang;
+            convertedWPURL = convertedWPURL.replace("lang=en", langParam);
+
+            //display in url (converted) field
+            document.getElementById("convertedWPURL").value = convertedWPURL;
+        }
+
+        function selectWP() {
+
+            //return radios selection
+            if (document.getElementById("myRadiosWP").checked == true) {
+                webcard = "wp"
+            } else {
+                webcard = "twp";
+            }
+            return webcard;
+
+        }
+
+        function checkForm() {
+            
+            if (document.getElementById("nativeMapWPURL").value == "") {//reload page if native map field is empty 
+                alert("Please fill in url from native map.");
+                location.reload();
+            } else {//else, make convertion
+
+                if (webcard == "wp") {
+
+                    wphandler();//call wphandler() to convert to a wp url
+
+                } else {
+
+                    twphandler();//call twhandler() to convert to a twp url
+                }
+
+            }
+        }
+
+        function copyToClipboard() {
+
+            if (document.getElementById("convertedWPURL").value == "") {
+                alert("nothing to copy in transit WP field.");
+                location.reload();
+            } else {
+                //copy transit wp url to clipboard
+                var tWPURL = document.getElementById("convertedWPURL").value;
+                window.prompt("Copy to clipboard: Ctrl+C, Enter", tWPURL);
+            }
+        }
+    </script>
+
+</head>
+
+<body onload="startHere();">
+    <div>
+        <h2>
+	URL Converter 
+</h2>
+
+        <form id="test1" name="test1" action="" method="POST">
+
+            <label for="nativeMapWPURL">URL (Native Map): </label>
+            <br>
+            <input type="text" name="nativeMapWPURL" id="nativeMapWPURL">
+            <br>
+
+            <label for="convertedWPURL">URL (Converted) </label>
+            <br>
+            <input type="text" name="convertedWPURL" id="convertedWPURL">
+            <br>
+
+            <input type="radio" name="myRadios" id="myRadiosWP" value="myRadiosWP" onClick="selectWP();"> WP
+            <input type="radio" name="myRadios" id="myRadiosTWP" value="myRadiosTWP" onClick="selectWP();"> Transit WP
+
+
+            <br>
+            <select id="myselect" onchange="checkSelect(this.value)">
+                <option value="blank">Language</option>
+                <option value="ar">ar</option>
+                <option value="ca">ca</option>
+                <option value="de">de</option>
+                <option value="el">el</option>
+                <option value="en">en</option>
+
+                <option value="es">es</option>
+                <option value="fi">fi</option>
+                <option value="fr">fr</option>
+                <option value="hi">hi</option>
+                <option value="hr">hr</option>
+
+                <option value="hu">hu</option>
+                <option value="id">id</option>
+                <option value="it">it</option>
+                <option value="iw">iw</option>
+                <option value="ja">ja</option>
+
+                <option value="ko">ko</option>
+                <option value="ms">ms</option>
+                <option value="nl">nl</option>
+                <option value="no">no</option>
+                <option value="pl">pl</option>
+
+                <option value="pt">pt</option>
+                <option value="ro">ro</option>
+                <option value="ru">ru</option>
+                <option value="sk">sk</option>
+                <option value="sv">sv</option>
+
+                <option value="th">th</option>
+                <option value="tr">tr</option>
+                <option value="uk">uk</option>
+                <option value="vi">vi</option>
+                <option value="zh">zh</option>
+            </select>
+
+            <p>
+
+                <input type="button" value="Clear" onclick="clearForm()"> &nbsp; &nbsp;
+                <input type="submit" name="Submit" value="Convert" id="mySubmit" onclick="checkForm(); return false;"> &nbsp; &nbsp;
+                <input type="submit" name="Copy" value="Copy" id="myCopy" onclick="copyToClipboard(); return false;">
+
+            </p>
+        </form>
+    </div>
+</body>
+
+</html>
